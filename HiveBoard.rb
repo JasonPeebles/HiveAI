@@ -20,6 +20,15 @@ class Piece
   def to_s
     "#{identifier}#{@position}h#{@height}"
   end
+  
+  def eql?(otherPiece)
+    self.identifier == otherPiece.identifier
+  end
+  
+  def hash
+    self.identifier.hash
+  end
+    
 end
 
 class HiveBoard
@@ -76,7 +85,7 @@ class HiveBoard
     position = if p.kind_of?(Piece) then p.position elsif p.kind_of?(Point) then p else nil end
     pieces = []
     if position
-      Point.unitDisc(position).each{|point| pieces += piecesAtPoint(point)}
+      Point.unitDisc(position).each{|point| pieces |= piecesAtPoint(point)}
     end
     pieces
   end
@@ -113,10 +122,10 @@ class HiveBoard
     branchPieces = piecesConnected(refPiece)
     
     while !branchPieces.empty?
-      connectedPieces = connectedPieces.union(branchPieces).uniq
+      connectedPieces |= branchPieces
       newPieces = []
-      branchPieces.each{|p| newPieces += piecesConnected(p)}
-      branchPieces = newPieces.uniq - connectedPieces
+      branchPieces.each{|p| newPieces |= piecesConnected(p)}
+      branchPieces = newPieces - connectedPieces
     end
     
     connectedPieces.count == piecesOnBoard.count
